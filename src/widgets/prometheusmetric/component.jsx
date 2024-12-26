@@ -26,6 +26,13 @@ function formatValue(t, metric, rawValue) {
 
   // Format the value using a known type and optional options.
   switch (metric?.format?.type) {
+    case "bool":
+      if (value) {
+        value = "🟢";
+      } else {
+      	value = "❌";
+      }
+      break;
     case "text":
       break;
     default:
