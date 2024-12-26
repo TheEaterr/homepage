@@ -22,7 +22,7 @@ export default function Component({ service }) {
       <Container service={service}>
         <Block label="qnap.cpuUsage" />
         <Block label="qnap.memUsage" />
-        <Block label="qnap.systemTempC" />
+        <Block label="qnap.events" />
         <Block label={widget.volume ? "qnap.volumeUsage" : "qnap.poolUsage"} />
       </Container>
     );
@@ -31,7 +31,7 @@ export default function Component({ service }) {
   const cpuUsage = statusData.system.cpu_usage._cdata.replace(" %", "");
   const totalMemory = statusData.system.total_memory._cdata;
   const freeMemory = statusData.system.free_memory._cdata;
-  const systemTempC = statusData.system.sys_tempc._text;
+  const numEvents = statusData.syslog.count._text;
   let volumeTotalSize = 0;
   let volumeFreeSize = 0;
   let validVolume = true;
@@ -66,8 +66,8 @@ export default function Component({ service }) {
         value={t("common.percent", { value: (((totalMemory - freeMemory) / totalMemory) * 100).toFixed(0) })}
       />
       <Block
-        label="qnap.systemTempC"
-        value={t("common.number", { value: systemTempC, maximumFractionDigits: 1, style: "unit", unit: "celsius" })}
+        label="qnap.events"
+        value={t("common.number", { value: numEvents })}
       />
       <Block
         label={widget.volume ? "qnap.volumeUsage" : "qnap.poolUsage"}

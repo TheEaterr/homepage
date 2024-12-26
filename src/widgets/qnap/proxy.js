@@ -57,6 +57,11 @@ async function apiCall(widget, endpoint, service) {
     return { status, contentType, data: null, responseHeaders };
   }
 
+  // text/html content type indicates a json response. I know...
+  if (contentType.includes("text/html")) {
+    return { status, contentType, data: JSON.parse(data.toString()), responseHeaders };
+  }
+
   let dataDecoded = JSON.parse(xml2json(data.toString(), { compact: true }).toString());
 
   if (dataDecoded.QDocRoot.authPassed._cdata === "0") {
@@ -104,9 +109,23 @@ export default async function qnapProxyHandler(req, res) {
     "{url}/cgi-bin/management/chartReq.cgi?chart_func=disk_usage&disk_select=all&include=all",
     service,
   );
+  
+  const { data: userConfigData } = await apiCall(
+    widget,
+    "{url}/cgi-bin/userConfig.cgi?func=get_all",
+    service,
+  );
+  const syslogStartTime = userConfigData.datetime.sysLogClearAll;
+  const currentTime = new Date().getTime();
+  const { data: syslogData } = await apiCall(
+    widget,
+    `{url}/cgi-bin/sys/sysRequest.cgi?startTime=${syslogStartTime}&eventlogQueryByClientTime=1&count=${currentTime}&sort=13&lower=0&subfunc=sys_logs&filtertype=1%2C2&range=30&upper=21&group=7`,
+    service,
+  );
 
   return res.status(200).send({
     system: systemStatsData.QDocRoot.func.ownContent.root,
     volume: volumeStatsData.QDocRoot,
+    syslog: syslogData.QDocRoot.logroot,
   });
 }

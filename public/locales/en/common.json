@@ -216,6 +216,7 @@
         "cpuUsage": "CPU Usage",
         "memUsage": "MEM Usage",
         "systemTempC": "System Temp",
+        "events": "Fail Events",
         "poolUsage": "Pool Usage",
         "volumeUsage": "Volume Usage",
         "invalid": "Invalid"
