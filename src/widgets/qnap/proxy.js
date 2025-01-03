@@ -30,7 +30,8 @@ async function login(widget, service) {
     const dataDecoded = xml2json(data.toString(), { compact: true });
     const jsonData = JSON.parse(dataDecoded);
     const token = jsonData.QDocRoot.authSid._cdata;
-    cache.put(`${sessionTokenCacheKey}.${service}`, token);
+    // Cache the token for 1 hour
+    cache.put(`${sessionTokenCacheKey}.${service}`, token, 3600000);
     return { token };
   } catch (e) {
     logger.error("Unable to login to QNAP API: %s", e);
@@ -99,33 +100,39 @@ export default async function qnapProxyHandler(req, res) {
     await login(widget, service);
   }
 
-  const { data: systemStatsData } = await apiCall(
-    widget,
-    "{url}/cgi-bin/management/manaRequest.cgi?subfunc=sysinfo&hd=no&multicpu=1",
-    service,
-  );
-  const { data: volumeStatsData } = await apiCall(
-    widget,
-    "{url}/cgi-bin/management/chartReq.cgi?chart_func=disk_usage&disk_select=all&include=all",
-    service,
-  );
-  
-  const { data: userConfigData } = await apiCall(
+  const userConfigPromise = apiCall(
     widget,
     "{url}/cgi-bin/userConfig.cgi?func=get_all",
     service,
   );
+  const systemStatsPromise = apiCall(
+    widget,
+    "{url}/cgi-bin/management/manaRequest.cgi?subfunc=sysinfo&hd=no&multicpu=1",
+    service,
+  );
+  const volumeStatsPromise = apiCall(
+    widget,
+    "{url}/cgi-bin/management/chartReq.cgi?chart_func=disk_usage&disk_select=all&include=all",
+    service,
+  );
+  const { data: userConfigData } = await userConfigPromise;
   const syslogStartTime = userConfigData.datetime.sysLogClearAll;
   const currentTime = new Date().getTime();
-  const { data: syslogData } = await apiCall(
+  const syslogPromise = apiCall(
     widget,
     `{url}/cgi-bin/sys/sysRequest.cgi?startTime=${syslogStartTime}&eventlogQueryByClientTime=1&count=${currentTime}&sort=13&lower=0&subfunc=sys_logs&filtertype=1%2C2&range=30&upper=21&group=7`,
     service,
   );
 
+  const [systemStats, volumeStats, syslog] = await Promise.all([
+    systemStatsPromise,
+    volumeStatsPromise,
+    syslogPromise,
+  ]);
+
   return res.status(200).send({
-    system: systemStatsData.QDocRoot.func.ownContent.root,
-    volume: volumeStatsData.QDocRoot,
-    syslog: syslogData.QDocRoot.logroot,
+    system: systemStats.data.QDocRoot.func.ownContent.root,
+    volume: volumeStats.data.QDocRoot,
+    syslog: syslog.data.QDocRoot.logroot,
   });
 }
