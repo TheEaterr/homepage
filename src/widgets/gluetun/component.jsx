@@ -15,7 +15,6 @@ export default function Component({ service }) {
     return (
       <Container service={service}>
         <Block label="gluetun.public_ip" />
-        <Block label="gluetun.region" />
         <Block label="gluetun.country" />
       </Container>
     );
@@ -24,7 +23,6 @@ export default function Component({ service }) {
   return (
     <Container service={service}>
       <Block label="gluetun.public_ip" value={gluetunData.public_ip} />
-      <Block label="gluetun.region" value={gluetunData.region} />
       <Block label="gluetun.country" value={gluetunData.country} />
     </Container>
   );
