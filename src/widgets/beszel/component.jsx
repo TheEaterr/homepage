@@ -1,7 +1,7 @@
 import { useTranslation } from "next-i18next";
-
 import Container from "components/services/widget/container";
 import Block from "components/services/widget/block";
+
 import useWidgetAPI from "utils/proxy/use-widget-api";
 
 export default function Component({ service }) {
@@ -26,7 +26,7 @@ export default function Component({ service }) {
   if (systems && !systems.items) {
     finalError = { message: "No items returned from beszel API" };
   } else if (systems && systems.items && systemId) {
-    system = systems.items.find((item) => item.id === systemId);
+    system = systems.items.find((item) => item.id === systemId || item.name === systemId);
     if (!system) {
       finalError = { message: `System with id ${systemId} not found` };
     }

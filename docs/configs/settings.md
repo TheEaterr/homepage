@@ -13,6 +13,14 @@ You can customize the title of the page if you'd like.
 title: My Awesome Homepage
 ```
 
+## Description
+
+You can customize the description of the page if you'd like.
+
+```yaml
+description: A description of my awesome homepage
+```
+
 ## Start URL
 
 You can customize the start_url as required for installable apps. The default is "/".
@@ -439,12 +447,18 @@ quicklaunch:
   suggestionUrl: https://ac.ecosia.org/autocomplete?type=list&q=
 ```
 
-## Homepage Version
+## Homepage Version & Update Checking
 
 By default the release version is displayed at the bottom of the page. To hide this, use the `hideVersion` setting, like so:
 
 ```yaml
 hideVersion: true
+```
+
+You can disable checking for new versions from GitHub (enabled by default) with:
+
+```yaml
+disableUpdateCheck: true
 ```
 
 ## Log Path
